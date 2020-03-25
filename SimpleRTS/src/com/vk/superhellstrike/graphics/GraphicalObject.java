@@ -5,7 +5,7 @@ import java.awt.Rectangle;
 import com.jogamp.opengl.GL2;
 
 public abstract class GraphicalObject {
-	private Rectangle r;
+	protected Rectangle r;
 	
 	/*
 	 * Constructors
