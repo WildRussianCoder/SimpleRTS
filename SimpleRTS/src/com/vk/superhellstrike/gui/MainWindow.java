@@ -7,7 +7,6 @@ import com.jogamp.opengl.GLCapabilities;
 import com.jogamp.opengl.GLProfile;
 import com.jogamp.opengl.awt.GLJPanel;
 import com.jogamp.opengl.util.FPSAnimator;
-import com.vk.superhellstrike.input.InputController;
 import com.vk.superhellstrike.render.BasicRenderer;
 
 public class MainWindow {
@@ -22,7 +21,6 @@ public class MainWindow {
 	private GLCapabilities caps;
 	private BasicRenderer renderer;
 	private FPSAnimator animator;
-	private InputController inputController;
 	
 	public MainWindow() {	
 		frame = new JFrame(TITLE);
@@ -33,12 +31,11 @@ public class MainWindow {
 		
 		caps = new GLCapabilities(GLProfile.get(GLProfile.GL2));
 		renderer = new BasicRenderer();
-		inputController = new InputController(renderer);
 		
 		panel = new GLJPanel(caps);
 		panel.addGLEventListener(renderer);
-		panel.addMouseListener(inputController);
-		panel.addKeyListener(inputController);
+		panel.addMouseListener(renderer);
+		panel.addKeyListener(renderer);
 		frame.getContentPane().add(panel);
 		
 		animator = new FPSAnimator(panel, FPS, true);

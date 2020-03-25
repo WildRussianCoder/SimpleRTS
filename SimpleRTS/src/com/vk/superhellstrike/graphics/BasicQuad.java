@@ -7,8 +7,11 @@ import com.jogamp.opengl.GL2;
 public class BasicQuad implements GraphicalObject {
 	private Rectangle r;
 	
-	public BasicQuad(int x, int y) {
+	private int textureObject;
+	
+	public BasicQuad(int x, int y, int textureObj) {
 		this.r = new Rectangle(x - 10, y - 10, 20, 20);
+		this.textureObject = textureObj;
 	}
 
 	@Override
@@ -59,7 +62,21 @@ public class BasicQuad implements GraphicalObject {
 
 	@Override
 	public void draw(GL2 gl) {
-		gl.glRecti(r.x, r.y, r.x + r.width, r.y + r.height);
+		gl.glBindTexture(GL2.GL_TEXTURE_2D, textureObject);
+		gl.glBegin(GL2.GL_QUADS);
+		
+		gl.glTexCoord2i(0, 1);
+		gl.glVertex2i(r.x, r.y);
+		
+		gl.glTexCoord2i(0, 0);
+		gl.glVertex2i(r.x, r.y + r.height);
+		
+		gl.glTexCoord2i(1, 0);
+		gl.glVertex2i(r.x + r.width, r.y + r.height);
+		
+		gl.glTexCoord2i(1, 1);
+		gl.glVertex2i(r.x + r.width, r.y);
+		gl.glEnd();
 	}
 
 	@Override
