@@ -20,7 +20,22 @@ public class GridMap extends BasicRenderer {
 	private GL2 gl;
 	private GridCell previousHighlighted;
 	
+	private boolean isDragged;
+	private int startX;
+	private int startY;
+	private int dX;
+	private int dY;
+	private int currentX;
+	private int currentY;
+	
 	public GridMap(int mapSize, int cellSize, boolean gridIsVisible) {
+		this.isDragged = false;
+		this.dX = 0;
+		this.dY = 0;
+		this.startX = 0;
+		this.startY = 0;
+		this.currentX = 0;
+		this.currentY = 0;
 		this.grid = new Grid(0, 0, mapSize, cellSize, Color.white);
 		this.gridIsVisible = gridIsVisible;
 		this.mapSize = mapSize;
@@ -38,6 +53,8 @@ public class GridMap extends BasicRenderer {
 	public void display(GLAutoDrawable drawable) {
 		gl.glClear(GL2.GL_COLOR_BUFFER_BIT);
 		
+		gl.glPushMatrix();
+		gl.glTranslatef(currentX, currentY, 0);
 		for(int i = 0; i < mapSize; i++) {
 			for(int j = 0; j < mapSize; j++) {
 				map[i][j].draw(gl);
@@ -46,33 +63,82 @@ public class GridMap extends BasicRenderer {
 		
 		if(gridIsVisible)
 			grid.draw(gl);
+		
+		gl.glPopMatrix();
 		gl.glFlush();
 	}
 	
 	@Override
 	public void mouseClicked(MouseEvent e) {
-		int row = e.getY() / cellSize;
-		int column = e.getX() / cellSize;
+		int x = e.getX();
+		int y = e.getY();
 		int button = e.getButton();
 		
-		if(button == MouseEvent.BUTTON1 && row < mapSize && column < mapSize) {
+		if(button == MouseEvent.BUTTON1 && 
+				x < currentX + cellSize*mapSize && x >= currentX &&
+				y < currentY + cellSize*mapSize && y >= currentY) {
+			int column = (x - currentX)/cellSize;
+			int row = (y - currentY)/cellSize;
 			map[row][column].setSprite(new BasicQuad(column*cellSize, row*cellSize, cellSize, cellSize, new Color(255, 0, 255)));
 		}
 	}
 	
 	@Override
-	public void mouseMoved(MouseEvent e) {
-		int row = e.getY() / cellSize;
-		int column = e.getX() / cellSize;
+	public void mousePressed(MouseEvent e) {
+		int button = e.getButton();
+		int x = e.getX();
+		int y = e.getY();
 		
-		if(row < mapSize && column < mapSize) {
+		if(button == MouseEvent.BUTTON2) {
+			startX = x;
+			startY = y;
+			isDragged = true;
+		}
+	}
+	
+	@Override
+	public void mouseReleased(MouseEvent e) {
+		int button = e.getButton();
+		if(button == MouseEvent.BUTTON2)
+			isDragged = false;
+	}
+	
+	@Override
+	public void mouseMoved(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
+		
+		if(x < currentX + mapSize*cellSize && x >= currentX && y >= currentY && y < currentY + mapSize*cellSize) {
+			int column = (x - currentX)/cellSize;
+			int row = (y - currentY)/cellSize;
 			if(previousHighlighted != null)
 				previousHighlighted.setHighlight(false);
 			map[row][column].setHighlight(true);
 			previousHighlighted = map[row][column];
 			
 		}
+	}
+	
+	@Override
+	public void mouseDragged(MouseEvent e) {
+		int x = e.getX();
+		int y = e.getY();
 		
+		if(isDragged) {
+			dX = x - startX;
+			dY = y - startY;
+			
+			if(Math.abs(dX) > cellSize) {
+				startX += dX;
+				currentX += dX > 10 ? cellSize : -cellSize;
+			}
+			
+			if(Math.abs(dY) > cellSize) {
+				startY += dY;
+				currentY += dY > 10 ? cellSize : -cellSize;
+			}
+		}
+			
 	}
 	
 	@Override
@@ -94,5 +160,4 @@ public class GridMap extends BasicRenderer {
 		gl.glMatrixMode(GL2.GL_MODELVIEW);
 		gl.glLoadIdentity();
 	}
-	
 }
